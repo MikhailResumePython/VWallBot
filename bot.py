@@ -10,7 +10,7 @@ def handleUpdate(update):
     chat_id = update['message']['chat']['id']
     message_text = update['message']['text']
     if message_text == '/start':
-        send_message(chat_id, '\xF0\x9F\x94\xAA')
+        send_message(chat_id, u'🔪')
     elif message_text == '/help':
         send_message(chat_id, 'help')
 
