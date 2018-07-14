@@ -6,13 +6,22 @@ BOT_TOKEN = '556191721:AAH11vENmvGlnHlDKnGiwWCnIIIdW5v-ntA'
 
 BASE_URL = 'https://api.telegram.org/bot' + BOT_TOKEN + '/'
 
+
+def log_json_update(update):
+    with open('updates.log', 'a') as log_file:
+        json.dump(update, log_file, indent=2, ensure_ascii=False)
+        log_file.write('\n\n')
+
 def handleUpdate(update):
     chat_id = update['message']['chat']['id']
-    message_text = update['message']['text']
+    try:
+        message_text = update['message']['text']
+    except KeyError:
+        return 'KeyError: \'text\''
     if message_text == '/start':
         send_message(chat_id, u'🔪')
     elif message_text == '/help':
-        send_message(chat_id, 'help')
+        send_message(chat_id, 'no')
 
 #TODO
 # Create one handler to avoid duplication

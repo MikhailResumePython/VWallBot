@@ -19,6 +19,7 @@ def index():
 def index_webhook():
     if request.method == 'POST':
         update = request.get_json()
+        bot.log_json_update(update)
         bot.handleUpdate(update)
         return jsonify(update)
     return 'hi'
