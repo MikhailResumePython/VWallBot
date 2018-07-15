@@ -25,15 +25,26 @@ def handleUpdate(update):
 
 #TODO
 # Create one handler to avoid duplication
-def send_message(chat_id, text):
+
+def send_message(chat_id, text, inline_url=None, inline_text=None):
     url = BASE_URL + 'sendMessage'
-    message = {'chat_id': chat_id, 'text': text}
+    if inline_url != None and inline_text != None:
+        ikb = {'text': inline_text, 'url': inline_url}
+        ikm = {'inline_keyboard': [[ikb]]}
+        message = {'chat_id': chat_id, 'text': text, 'reply_markup': ikm}
+    else:
+        message = {'chat_id': chat_id, 'text': text}
     post = requests.post(url, json=message)
     return post.json()
 
 
-def send_photo(chat_id, photo, caption=''):
+def send_photo(chat_id, photo, caption='', inline_url=None, inline_text=None):
     url = BASE_URL + 'sendPhoto'
-    message = {'chat_id': chat_id, 'photo': photo, 'caption': caption}
+    if inline_url != None and inline_text != None:
+        ikb = {'text': inline_text, 'url': inline_url}
+        ikm = {'inline_keyboard': [[ikb]]}
+        message = {'chat_id': chat_id, 'photo': photo, 'caption': caption, 'reply_markup': ikm}
+    else:
+        message = {'chat_id': chat_id, 'photo': photo, 'caption': caption}
     post = requests.post(url, json=message)
     return post.json()
