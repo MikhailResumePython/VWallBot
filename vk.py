@@ -1,14 +1,18 @@
 import requests
 import json
 import re
+import bot
 
-VK_ACCESS_TOKEN = 'd6b48fd0deea32e34f31285946d60dbb8269b60258d023b572290d9f33c3ea419476668ef5277a27c0ef9'
+#auth token Orlov
+VK_ACCESS_TOKEN = '51ceef69886c8177ce720559f871b2d02ce0efd67895525656430907744b806bf78d783bbc329daba28ac'
 VK_BASE_URL = 'https://api.vk.com/method/'
 
 
-def get_posts(domain, count):
-    url = VK_BASE_URL + 'wall.get?domain=' + domain 
-    url += '&count=' + count + '&filter=owner&v=5.80&access_token=' + VK_ACCESS_TOKEN
+def get_posts(count='50', filters='post', start_from=None):
+    url = ('{}newsfeed.get?filters={}&count={}&return_banned=0'
+            '&access_token={}&v=5.80').format(VK_BASE_URL, filters, count, VK_ACCESS_TOKEN)
+    if(start_from != None):
+        url += '&start_from={}'.format(start_from)
     posts = requests.get(url)
     return posts.json()
 
@@ -22,7 +26,10 @@ def parse_posts(posts):
         text = item['text']
         photos_url = []
         videos_url = []
-        pinned_audio = None
+        audio_url = None
+        attached_link = None
+        has_attached_album = False
+        has_attached_photos_list = False
         for attachment in item['attachments']:
             if(attachment['type'] == 'photo'):
                 for size in reversed(attachment['photo']['sizes']):
@@ -32,10 +39,15 @@ def parse_posts(posts):
                         break
             elif(attachment['type'] == 'video'):
                 videos_url.append(parse_video(attachment['video']))
-            elif(attachment['type'] == 'audio'):
-                pinned_audio = attachment['audio']['artist'] + ' - ' + attachment['audio']['title']
             elif(attachment['type'] == 'link'):
+                attached_link = attachment['link']['url']
+            elif(attachment['type'] == 'doc'):
                 pass
+            elif(attachment['type'] == 'album'):
+                attached_album = True
+            elif(attachment['type'] == 'photos_list'):
+                attached_photos_list = True
+
                         
 def parse_video(video):
     '''Return video url from VK video object.
@@ -60,3 +72,4 @@ def parse_video(video):
         vimeo_video_id = re.search(r'\/(\w+)\?', video_url).group(1)
         video_url = 'https://vimeo.com/' + vimeo_video_id
     return video_url
+

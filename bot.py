@@ -1,17 +1,14 @@
 import requests
 import json
-from vk import *
+import vk
 import io
+import tools
+
 
 BOT_TOKEN = '556191721:AAH11vENmvGlnHlDKnGiwWCnIIIdW5v-ntA'
 
 BASE_URL = 'https://api.telegram.org/bot' + BOT_TOKEN + '/'
 
-
-def log_json(data, filename):
-    with open(filename, 'a') as log_file:
-        json.dump(data, log_file, indent=2, ensure_ascii=False)
-        log_file.write('\n\n')
 
 def handleUpdate(update):
     chat_id = update['message']['chat']['id']
@@ -20,6 +17,7 @@ def handleUpdate(update):
     except KeyError:
         return 'KeyError: \'text\''
     returned_messages = []
+    rm = 'None'
     if message_text == '/start':
         rm = send_message(chat_id, u'🔪')
     elif message_text == '/help':
@@ -33,31 +31,26 @@ def handleUpdate(update):
     elif message_text == 'sa':
         rm = send_audio(chat_id, 'https://cs9-17v4.vkuseraudio.net/p5/6914a6d0d82c38.mp3')
     returned_messages.append(rm)
-    log_json(returned_messages, 'post_replies.log')
+    tools.log_json(returned_messages, 'post_replies.log')
 
 
 def send_message(chat_id, text, inline_url=None, inline_text=None):
-    url = BASE_URL + 'sendMessage'
+    message = {'chat_id': chat_id, 'text': text}
     if inline_url != None and inline_text != None:
-        ikb = {'text': inline_text, 'url': inline_url}
-        ikm = {'inline_keyboard': [[ikb]]}
-        message = {'chat_id': chat_id, 'text': text, 'reply_markup': ikm}
-    else:
-        message = {'chat_id': chat_id, 'text': text}
-    post = requests.post(url, json=message)
-    return post.json()
+        message = append_inline_link(message, inline_url, inline_text)
+    return make_request('sendMessage', message)
 
 
 def send_photo(chat_id, photo, inline_url=None, inline_text=None, caption=''):
-    url = BASE_URL + 'sendPhoto'
+    message = {'chat_id': chat_id, 'photo': photo, 'caption': caption}
     if inline_url != None and inline_text != None:
-        ikb = {'text': inline_text, 'url': inline_url}
-        ikm = {'inline_keyboard': [[ikb]]}
-        message = {'chat_id': chat_id, 'photo': photo, 'caption': caption, 'reply_markup': ikm}
-    else:
-        message = {'chat_id': chat_id, 'photo': photo, 'caption': caption}
-    post = requests.post(url, json=message)
-    return post.json()
+        message = append_inline_link(message, inline_url, inline_text)
+    return make_request('sendPhoto', message)
+
+
+def send_media_group(chat_id, media):
+    message = {'chat_id': chat_id, 'media': media}
+    return make_request('sendMediaGroup', message)
 
 
 def send_audio(chat_id, audio_url, performer='Unknown', title='Unknown'):
@@ -67,3 +60,18 @@ def send_audio(chat_id, audio_url, performer='Unknown', title='Unknown'):
     files = dict({'audio': file1})
     post = requests.post(url, files=files)
     return post.json()
+
+
+def make_request(method, message):
+    url = BASE_URL + method
+    post = requests.post(url, json=message)
+    return post.json()
+
+
+def append_inline_link(message, inline_url, inline_text):
+    ikb = {'text': inline_text, 'url': inline_url}
+    ikm = {'inline_keyboard': [[ikb]]}
+    message['reply_markup'] = ikm
+    return message
+
+
