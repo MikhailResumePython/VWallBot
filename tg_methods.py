@@ -43,21 +43,21 @@ def append_inline_link(message, inline_url, inline_text):
 '''Down below are Bot API methods'''
 
 
-def send_message(chat_id, text, inline_url=None, inline_text=None):
+def send_message(chat_id, text, inline_url=None, inline_text='VK link'):
     message = {'chat_id': chat_id, 'text': text}
     if inline_url != None and inline_text != None:
         message = append_inline_link(message, inline_url, inline_text)
     return make_request('sendMessage', message)
 
 
-def send_photo(chat_id, photo, inline_url=None, inline_text=None, caption=''):
+def send_photo(chat_id, photo, caption='', inline_url=None, inline_text='VK link'):
     message = {'chat_id': chat_id, 'caption': caption, 'photo': photo}
     if inline_url != None and inline_text != None:
         message = append_inline_link(message, inline_url, inline_text)
     return make_request('sendPhoto', message)
 
 
-def send_video(chat_id, video, inline_url=None, inline_text=None, caption=''):
+def send_video(chat_id, video, caption='', inline_url=None, inline_text='VK link'):
     message = {'chat_id': chat_id, 'video': video, 'caption': caption}
     if inline_url != None and inline_text != None:
         message = append_inline_link(message, inline_url, inline_text)
@@ -69,8 +69,10 @@ def send_media_group(chat_id, media):
     return make_request('sendMediaGroup', message)
 
 
-def send_document(chat_id, document):
-    message = {'chat_id': chat_id, 'document': document}
+def send_document(chat_id, document, caption='', inline_url=None, inline_text='VK link'):
+    message = {'chat_id': chat_id, 'document': document, 'caption': caption}
+    if inline_url != None and inline_text != None:
+        message = append_inline_link(message, inline_url, inline_text)
     return make_request('sendDocument', message)
 
 

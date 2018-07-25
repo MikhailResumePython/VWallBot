@@ -9,11 +9,12 @@ VK_BASE_URL = 'https://api.vk.com/method/'
 
 class Post:
     '''VK post class.'''
-    def __init__(self, post_id=None, text=None, link=None, photos=[], videos=[], 
+    def __init__(self,  ID=None, text=None, link=None, attached_link=None, photos=[], videos=[], 
                     docs=[], has_audio=False, has_album=False, has_photo_list=False):
-        self.post_id = post_id
+        self.ID = ID
         self.text = text
         self.link = link
+        self.attached_link = attached_link
         self.photos = photos
         self.videos = videos
         self.docs = docs
@@ -63,21 +64,22 @@ def parse_posts(posts):
         if item['is_pinned'] == 1:
             continue
         post = Post()
-        post.post_id = item['id']
+        post.ID = item['post_id']
         post.text = item['text']
+        post.link = 'https://vk.com/wall{}_{}'.format(item['source_id'], post.ID)
         for attachment in item['attachments']:
             if attachment['type'] == 'photo':
                 for size in reversed(attachment['photo']['sizes']):
                     if (size['type'] == 'z' or size['type'] == 'y' or size['type'] == 'x'
                                             or size['type'] == 'm' or size['type'] == 's'):
-                        post.photos.append(size['src'])
+                        post.photos.append(size['url'])
                         break
             elif attachment['type'] == 'video':
                 post.videos.append(parse_video(attachment['video']))
             elif attachment['type'] == 'doc' and attachment['doc']['size'] < 10**7:
                 post.docs.append(attachment['doc'])
             elif attachment['type'] == 'link':
-                post.link = attachment['link']['url']
+                post.attached_link = attachment['link']['url']
             elif attachment['type'] == 'audio':
                 post.has_audio = True
             elif attachment['type'] == 'album':

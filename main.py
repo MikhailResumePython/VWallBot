@@ -1,10 +1,8 @@
-from flask import Flask
-from flask import request
-from flask import jsonify
+from flask import Flask, request, jsonify
 import requests
 import json
 import bot
-from vk import get_posts
+import vk
 import tools
 
 
