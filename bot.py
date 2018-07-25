@@ -75,7 +75,7 @@ def send_posts(chat_id, posts):
             tg.send_media_group(chat_id, convert_to_IM(post.photos, 'photo'))
             tg.send_media_group(chat_id, convert_to_IM(post.videos, 'video'))
             tg.send_message(chat_id, text, post.link)
-        elif:
+        else:
             tg.send_message(chat_id, text, post.link)
         
         
