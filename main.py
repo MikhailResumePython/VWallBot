@@ -4,7 +4,7 @@ from flask import jsonify
 import requests
 import json
 import bot
-import vk
+from vk import get_posts
 import tools
 
 

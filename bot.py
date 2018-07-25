@@ -1,5 +1,6 @@
 import tools
 import tg_methods as tg
+import vk
 
 
 def start_bot():
