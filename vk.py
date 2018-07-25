@@ -7,6 +7,19 @@ import bot
 VK_ACCESS_TOKEN = '51ceef69886c8177ce720559f871b2d02ce0efd67895525656430907744b806bf78d783bbc329daba28ac'
 VK_BASE_URL = 'https://api.vk.com/method/'
 
+class Post:
+    def __init__(self, post_id=None, text=None, link=None, photos=[], videos=[], 
+                    docs=[], has_audio=False, has_album=False, has_photo_list=False):
+        self.post_id = post_id
+        self.text = text
+        self.link = link
+        self.photos = photos
+        self.videos = videos
+        self.docs = docs
+        self.has_audio = has_audio
+        self.has_album = has_album
+        self.has_photo_list = has_photo_list
+
 
 def get_posts(count='50', filters='post', start_from=None):
     url = ('{}newsfeed.get?filters={}&count={}&return_banned=0'
@@ -20,33 +33,32 @@ def get_posts(count='50', filters='post', start_from=None):
 def parse_posts(posts):
     parsed_posts = []
     for item in posts['response']['items']:
-        if(item['is_pinned'] == 1):
+        if item['is_pinned'] == 1:
             continue
-        post_id = item['id']
-        text = item['text']
-        photos_url = []
-        videos_url = []
-        audio_url = None
-        attached_link = None
-        has_attached_album = False
-        has_attached_photos_list = False
+        post = Post()
+        post.post_id = item['id']
+        post.text = item['text']
         for attachment in item['attachments']:
-            if(attachment['type'] == 'photo'):
+            if attachment['type'] == 'photo':
                 for size in reversed(attachment['photo']['sizes']):
-                    if(size['type'] == 'z' or size['type'] == 'y' 
-                            or size['type'] == 'x' or size['type'] == 'm' or size['type'] == 's'):
-                        photos_url.append(size['src'])
+                    if (size['type'] == 'z' or size['type'] == 'y' or size['type'] == 'x'
+                                            or size['type'] == 'm' or size['type'] == 's'):
+                        post.photos.append(size['src'])
                         break
-            elif(attachment['type'] == 'video'):
-                videos_url.append(parse_video(attachment['video']))
-            elif(attachment['type'] == 'link'):
-                attached_link = attachment['link']['url']
-            elif(attachment['type'] == 'doc'):
-                pass
-            elif(attachment['type'] == 'album'):
-                attached_album = True
-            elif(attachment['type'] == 'photos_list'):
-                attached_photos_list = True
+            elif attachment['type'] == 'video':
+                post.videos.append(parse_video(attachment['video']))
+            elif attachment['type'] == 'doc' and attachment['doc']['size'] < 10**7:
+                post.docs.append(attachment['doc'])
+            elif attachment['type'] == 'link':
+                post.link = attachment['link']['url']
+            elif attachment['type'] == 'audio':
+                post.has_audio = True
+            elif attachment['type'] == 'album':
+                post.has_album = True
+            elif attachment['type'] == 'photos_list':
+                post.has_photos_list = True   
+        parsed_posts.append(post)
+    return parsed_posts
 
                         
 def parse_video(video):
@@ -55,9 +67,9 @@ def parse_video(video):
     Args:
     video -- VK video object
     '''
-    url = VK_BASE_URL + 'video.get?owner_id=' + video['owner_id'] 
-    url += '&videos=' + video['owner_id'] + '_' + video['id'] 
-    url += 'count=1&extended=0&v=5.80&access_token=' + VK_ACCESS_TOKEN
+    url = ('{}video.get?owner_id={}&videos={}_{}&count=1&extended=0&v=5.80'
+            '&access_token={}').format(VK_BASE_URL, video['owner_id'], 
+                                        video['owner_id'], video['id'], VK_ACCESS_TOKEN)
     video_obj = requests.get(url)['response']['items'][0]
     video_url = video_obj['player']
     try:

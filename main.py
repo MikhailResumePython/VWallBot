@@ -33,6 +33,5 @@ def auth():
 
 
 if __name__ == '__main__':
-    tools.log_json(bot.send_media_group(166240669, [{'type': 'photo', 'media': 'https://pp.userapi.com/c846124/v846124612/a6b12/A3DZnLYUfGg.jpg'}, {'type': 'photo', 'media': 'https://pp.userapi.com/c846124/v846124612/a6b12/A3DZnLYUfGg.jpg'}]), 'test.log')
-    #app.run(host='127.0.0.1', port=8080)
+    app.run(host='127.0.0.1', port=8080)
 
