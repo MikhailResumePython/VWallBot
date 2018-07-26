@@ -14,7 +14,7 @@ def get_start_time(): #tmp func
         return f.read()
 
 def start_bot():
-    TMP_chat_id = '166240669'
+    TMP_chat_id = '-1001185647456'
     while True:
         start_time = get_start_time()
         posts = vk.get_posts(start_time)
@@ -24,11 +24,11 @@ def start_bot():
 
 
 def handleUpdate(update):
-    chat_id = update['message']['chat']['id']
     try:
+        chat_id = update['message']['chat']['id']
         message_text = update['message']['text']
     except KeyError:
-        return 'KeyError: \'text\''
+        return
     returned_messages = []
     rm = 'None'
     if message_text == '/start':
@@ -41,9 +41,12 @@ def handleUpdate(update):
 
 def send_posts(chat_id, posts):
     for post in reversed(posts):
+        docs_count = len(post.docs)
+        photos_count = len(post.photos)
         text = post.text
         text_is_fittable = True
-        text = '*{}*\n{}'.format(post.group_name, text)
+        group_name_heading = '*{}*\n'.format(post.group_name)
+
         if post.attached_link != None:
             text += '\n' + post.attached_link
         if post.page != None:
@@ -56,31 +59,40 @@ def send_posts(chat_id, posts):
             text += '\n\[VWallBot: VK Audio]'
         if len(text) > 200:
             text_is_fittable = False
+        if text_is_fittable and docs_count + photos_count < 2:
+            text = group_name_heading + text
 
         for video in post.videos:
             text += '\n' + video
 
-        if len(post.docs) == 1:
+        if docs_count == 1 and photos_count == 0:
             if text_is_fittable == True:
                 tg.send_document(chat_id, post.docs[0], text, post.link)
             else:
-                tg.send_document(chat_id, post.docs[0], text)
+                tg.send_document(chat_id, post.docs[0], group_name_heading)
                 tg.send_message(chat_id, text, post.link)
-        elif len(post.docs) > 1:
+        elif docs_count > 1 and photos_count == 0:
             for doc in post.docs:
-                tg.send_document(chat_id, doc, text)
+                tg.send_document(chat_id, doc)
             tg.send_message(chat_id, text, post.link)
 
-        if len(post.photos) == 1:
+        elif photos_count == 1 and docs_count == 0:
             if text_is_fittable == True:
                 tg.send_photo(chat_id, post.photos[0], text, post.link)
             else:
-                tg.send_photo(chat_id, post.photos[0])
+                tg.send_photo(chat_id, post.photos[0], group_name_heading)
                 tg.send_message(chat_id, text, post.link)
-        elif len(post.photos) > 1:
+        elif photos_count > 1 and docs_count == 0:
             tg.send_media_group(chat_id, convert_to_IM(post.photos, 'photo'))
             tg.send_message(chat_id, text, post.link)
-        else:
+        
+        elif photos_count >= 1 and docs_count >= 1:
+            tg.send_photo(chat_id, post.photos[0])
+            for doc in post.docs:
+                tg.send_document(chat_id, doc)
+            tg.send_message(chat_id, text, post.link)
+
+        elif photos_count == 0 and docs_count == 0:
             tg.send_message(chat_id, text, post.link)
         
 
