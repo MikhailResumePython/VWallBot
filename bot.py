@@ -1,12 +1,26 @@
 import tools
 import tg_methods as tg
 import vk
+import time
 
+
+
+def set_start_time(next_from): #tmp func
+    with open('start_time_tmp.txt', 'w') as f:
+        f.write(str(next_from))
+
+def get_start_time(): #tmp func
+    with open('start_time_tmp.txt', 'r') as f:
+        return f.read()
 
 def start_bot():
     TMP_chat_id = '166240669'
-    posts = vk.get_posts()
-    send_posts(TMP_chat_id, posts)
+    while True:
+        start_time = get_start_time()
+        posts = vk.get_posts(start_time)
+        if len(posts) != 0:
+            send_posts(TMP_chat_id, posts)
+        time.sleep(300)
 
 
 def handleUpdate(update):
@@ -26,21 +40,25 @@ def handleUpdate(update):
 
 
 def send_posts(chat_id, posts):
-    for post in posts:
-        videos_count = len(post.videos)
-        photos_count = len(post.photos)
+    for post in reversed(posts):
         text = post.text
         text_is_fittable = True
+        text = '*{}*\n{}'.format(post.group_name, text)
         if post.attached_link != None:
             text += '\n' + post.attached_link
-        if post.has_album != None:
-            text += '\nVWallBot:[VK Album]'
-        if post.has_album != None:
-            text += '\nVWallBot:[VK Photo List]'
-        if post.has_album != None:
-            text += '\nVWallBot:[VK Audio]'
+        if post.page != None:
+            text += '\n' + post.page
+        if post.has_album == True:
+            text += '\n\[VWallBot: VK Album]'
+        if post.has_photo_list == True:
+            text += '\n\[VWallBot: VK Photo List]'
+        if post.has_audio == True:
+            text += '\n\[VWallBot: VK Audio]'
         if len(text) > 200:
             text_is_fittable = False
+
+        for video in post.videos:
+            text += '\n' + video
 
         if len(post.docs) == 1:
             if text_is_fittable == True:
@@ -53,34 +71,18 @@ def send_posts(chat_id, posts):
                 tg.send_document(chat_id, doc, text)
             tg.send_message(chat_id, text, post.link)
 
-        if photos_count == 1 and videos_count == 0:
+        if len(post.photos) == 1:
             if text_is_fittable == True:
                 tg.send_photo(chat_id, post.photos[0], text, post.link)
             else:
                 tg.send_photo(chat_id, post.photos[0])
                 tg.send_message(chat_id, text, post.link)
-        elif photos_count > 1 and videos_count == 0:
+        elif len(post.photos) > 1:
             tg.send_media_group(chat_id, convert_to_IM(post.photos, 'photo'))
-            tg.send_message(chat_id, text, post.link)
-        elif videos_count == 1 and photos_count == 0:
-            if text_is_fittable == True:
-                tg.send_video(chat_id, post.videos[0], text, post.link)
-            else:
-                tg.send_video(chat_id, post.videos[0])
-                tg.send_message(chat_id, text, post.link)
-        elif videos_count > 1 and photos_count == 0:
-            tg.send_media_group(chat_id, convert_to_IM(post.videos, 'video'))
-            tg.send_message(chat_id, text, post.link)
-        elif videos_count >= 1 and photos_count >= 1:
-            tg.send_media_group(chat_id, convert_to_IM(post.photos, 'photo'))
-            tg.send_media_group(chat_id, convert_to_IM(post.videos, 'video'))
             tg.send_message(chat_id, text, post.link)
         else:
             tg.send_message(chat_id, text, post.link)
         
-        
-
-
 
 def convert_to_IM(array, IM_type):
     input_media =[]

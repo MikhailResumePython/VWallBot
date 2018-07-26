@@ -4,6 +4,7 @@ import json
 import bot
 import vk
 import tools
+import tg_methods as tg
 
 
 app = Flask(__name__)
@@ -31,5 +32,7 @@ def auth():
 
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=8080)
+    bot.start_bot()
+    #app.run(host='127.0.0.1', port=8080)
+
 

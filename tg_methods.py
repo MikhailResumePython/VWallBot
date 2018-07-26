@@ -44,21 +44,21 @@ def append_inline_link(message, inline_url, inline_text):
 
 
 def send_message(chat_id, text, inline_url=None, inline_text='VK link'):
-    message = {'chat_id': chat_id, 'text': text}
+    message = {'chat_id': chat_id, 'text': text, 'parse_mode': 'markdown'}
     if inline_url != None and inline_text != None:
         message = append_inline_link(message, inline_url, inline_text)
     return make_request('sendMessage', message)
 
 
 def send_photo(chat_id, photo, caption='', inline_url=None, inline_text='VK link'):
-    message = {'chat_id': chat_id, 'caption': caption, 'photo': photo}
+    message = {'chat_id': chat_id, 'caption': caption, 'photo': photo, 'parse_mode': 'markdown'}
     if inline_url != None and inline_text != None:
         message = append_inline_link(message, inline_url, inline_text)
     return make_request('sendPhoto', message)
 
 
 def send_video(chat_id, video, caption='', inline_url=None, inline_text='VK link'):
-    message = {'chat_id': chat_id, 'video': video, 'caption': caption}
+    message = {'chat_id': chat_id, 'video': video, 'caption': caption, 'parse_mode': 'markdown'}
     if inline_url != None and inline_text != None:
         message = append_inline_link(message, inline_url, inline_text)
     return make_request('sendVideo', message)
@@ -70,7 +70,7 @@ def send_media_group(chat_id, media):
 
 
 def send_document(chat_id, document, caption='', inline_url=None, inline_text='VK link'):
-    message = {'chat_id': chat_id, 'document': document, 'caption': caption}
+    message = {'chat_id': chat_id, 'document': document, 'caption': caption, 'parse_mode': 'markdown'}
     if inline_url != None and inline_text != None:
         message = append_inline_link(message, inline_url, inline_text)
     return make_request('sendDocument', message)

@@ -9,8 +9,10 @@ VK_BASE_URL = 'https://api.vk.com/method/'
 
 class Post:
     '''VK post class.'''
-    def __init__(self,  ID=None, text=None, link=None, attached_link=None, photos=[], videos=[], 
-                    docs=[], has_audio=False, has_album=False, has_photo_list=False):
+    def __init__(self, group_name=None, ID=None, text=None, link=None, attached_link=None,
+                    photos=None, videos=None, docs=None, has_audio=False, has_album=False,
+                    has_photo_list=False, page=None):
+        self.group_name = group_name
         self.ID = ID
         self.text = text
         self.link = link
@@ -21,33 +23,43 @@ class Post:
         self.has_audio = has_audio
         self.has_album = has_album
         self.has_photo_list = has_photo_list
+        self.page = page
+        if photos == None:
+            self.photos = []
+        if videos == None:
+            self.videos = []
+        if docs == None:
+            self.docs = []    
 
 
-def get_posts(start_from = None):
+def get_posts(start_time = None):
     '''
     Return list of Post objects
 
     Args:
-    start_from -- Identifier required to get the next page of results
+    start_time -- Identifier required to get the next page of results
     '''
-    posts = newsfeed_get(start_from)
+    if start_time == '':
+        start_time = None
+    posts = newsfeed_get(start_time)
+    bot.set_start_time(posts['response']['items'][0]['date'])
     return parse_posts(posts)
 
 
-def newsfeed_get(start_from=None, filters='post'):
+def newsfeed_get(start_time=None, count=1, filters='post'):
     '''
     Return data required to show newsfeed for the current user.
 
     Args:
     filters -- Listed comma-separated list of feed lists that you need to receive
-    start_from -- Identifier required to get the next page of results
+    start_time -- Earliest timestamp (in Unix time) of a news item to return
     '''
     url = ('{}newsfeed.get?filters={}&return_banned=0'
             '&access_token={}&v=5.80').format(VK_BASE_URL, filters, VK_ACCESS_TOKEN)
-    if start_from != None:
-        url += '&start_from={}'.format(start_from)
+    if start_time != None:
+        url += '&start_time={}'.format(start_time)
     else:
-        url + '&count=10'
+        url += '&count={}'.format(count)
     posts = requests.get(url)
     return posts.json()
 
@@ -61,10 +73,9 @@ def parse_posts(posts):
     '''
     parsed_posts = []
     for item in posts['response']['items']:
-        if item['is_pinned'] == 1:
-            continue
         post = Post()
         post.ID = item['post_id']
+        post.group_name = get_group_name(abs(item['source_id']))
         post.text = item['text']
         post.link = 'https://vk.com/wall{}_{}'.format(item['source_id'], post.ID)
         for attachment in item['attachments']:
@@ -80,6 +91,8 @@ def parse_posts(posts):
                 post.docs.append(attachment['doc'])
             elif attachment['type'] == 'link':
                 post.attached_link = attachment['link']['url']
+            elif attachment['type'] == 'page':
+                post.page = attachment['page']['view_url']
             elif attachment['type'] == 'audio':
                 post.has_audio = True
             elif attachment['type'] == 'album':
@@ -100,18 +113,24 @@ def parse_video(video):
     url = ('{}video.get?owner_id={}&videos={}_{}&count=1&extended=0&v=5.80'
             '&access_token={}').format(VK_BASE_URL, video['owner_id'], 
                                         video['owner_id'], video['id'], VK_ACCESS_TOKEN)
-    video_obj = requests.get(url)['response']['items'][0]
+    video_obj = requests.get(url).json()['response']['items'][0]
     video_url = video_obj['player']
     try:
         video_platform = video_obj['platform'].lower()
     except KeyError:
-        video_url = 'https://vk.com/video' + video_obj['owner_id'] + '_' + video_obj['id'] 
+        video_url = 'https://vk.com/video{}_{}'.format(video_obj['owner_id'], video_obj['id'])
         return video_url
     if video_platform == 'youtube':
-        watch_v = re.search(r'\/(\w+)\?', video_url).group(1)
+        watch_v = re.search(r'\/([^\/]+)\?', video_url).group(1)
         video_url = 'https://www.youtube.com/watch?v=' + watch_v
     elif video_platform == 'vimeo':
-        vimeo_video_id = re.search(r'\/(\w+)\?', video_url).group(1)
+        vimeo_video_id = re.search(r'\/([^\/]+)\?', video_url).group(1)
         video_url = 'https://vimeo.com/' + vimeo_video_id
     return video_url
 
+
+def get_group_name(group_id):
+    url = ('{}groups.getById?group_id={}'
+            '&access_token={}&v=5.80').format(VK_BASE_URL, group_id,VK_ACCESS_TOKEN)
+    group = requests.get(url)
+    return group.json()['response'][0]['name']
