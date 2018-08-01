@@ -1,22 +1,24 @@
-import tools
-import tg_methods as tg
-import vk
+from VWB import vk, tools, tg_methods as tg
 import time
+import math
 
 
 
 def set_start_time(next_from): #tmp func
-    with open('start_time_tmp.txt', 'w') as f:
-        f.write(str(next_from))
+    with open('VWB/start_time_tmp.txt', 'w') as f:
+        f.write(str(int(next_from) + 1))
 
 def get_start_time(): #tmp func
-    with open('start_time_tmp.txt', 'r') as f:
+    with open('VWB/start_time_tmp.txt', 'r') as f:
         return f.read()
 
 def start_bot():
-    TMP_chat_id = '-1001185647456'
+    TMP_chat_id = '166240669'
     while True:
         start_time = get_start_time()
+        if(start_time == ''):
+            start_time = int(time.time() - 100)
+            set_start_time(start_time)
         posts = vk.get_posts(start_time)
         if len(posts) != 0:
             send_posts(TMP_chat_id, posts)
@@ -29,14 +31,10 @@ def handleUpdate(update):
         message_text = update['message']['text']
     except KeyError:
         return
-    returned_messages = []
-    rm = 'None'
     if message_text == '/start':
-        rm = tg.send_message(chat_id, u'🔪')
+        tg.send_message(chat_id, u'🔪')
     elif message_text == '/help':
-        rm = tg.send_message(chat_id, 'no')
-    returned_messages.append(rm)
-    tools.log_json(returned_messages, 'post_replies.log')
+        tg.send_message(chat_id, 'no')
 
 
 def send_posts(chat_id, posts):
@@ -45,22 +43,20 @@ def send_posts(chat_id, posts):
         photos_count = len(post.photos)
         text = post.text
         text_is_fittable = True
-        group_name_heading = '*{}*\n'.format(post.group_name)
+        text = '<b>{}</b>\n'.format(post.group_name) + text
 
         if post.attached_link != None:
             text += '\n' + post.attached_link
         if post.page != None:
             text += '\n' + post.page
         if post.has_album == True:
-            text += '\n\[VWallBot: VK Album]'
+            text += '\n[VWallBot: VK Album]'
         if post.has_photo_list == True:
-            text += '\n\[VWallBot: VK Photo List]'
+            text += '\n[VWallBot: VK Photo List]'
         if post.has_audio == True:
-            text += '\n\[VWallBot: VK Audio]'
+            text += '\n[VWallBot: VK Audio]'
         if len(text) > 200:
             text_is_fittable = False
-        if text_is_fittable and docs_count + photos_count < 2:
-            text = group_name_heading + text
 
         for video in post.videos:
             text += '\n' + video
@@ -69,7 +65,7 @@ def send_posts(chat_id, posts):
             if text_is_fittable == True:
                 tg.send_document(chat_id, post.docs[0], text, post.link)
             else:
-                tg.send_document(chat_id, post.docs[0], group_name_heading)
+                tg.send_document(chat_id, post.docs[0])
                 tg.send_message(chat_id, text, post.link)
         elif docs_count > 1 and photos_count == 0:
             for doc in post.docs:
@@ -80,7 +76,7 @@ def send_posts(chat_id, posts):
             if text_is_fittable == True:
                 tg.send_photo(chat_id, post.photos[0], text, post.link)
             else:
-                tg.send_photo(chat_id, post.photos[0], group_name_heading)
+                tg.send_photo(chat_id, post.photos[0])
                 tg.send_message(chat_id, text, post.link)
         elif photos_count > 1 and docs_count == 0:
             tg.send_media_group(chat_id, convert_to_IM(post.photos, 'photo'))

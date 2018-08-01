@@ -1,8 +1,8 @@
 import requests
 import json
-import vk
 import io
-import tools
+from VWB import vk, tools
+
 
 
 BOT_TOKEN = '556191721:AAH11vENmvGlnHlDKnGiwWCnIIIdW5v-ntA'
@@ -21,7 +21,9 @@ def make_request(method, message):
     '''
     url = BASE_URL + method
     post = requests.post(url, json=message)
-    return post.json()
+    post = post.json()
+    tools.log_json(post, 'request_replies.log')
+    return post
 
 
 def append_inline_link(message, inline_url, inline_text):
@@ -44,21 +46,21 @@ def append_inline_link(message, inline_url, inline_text):
 
 
 def send_message(chat_id, text, inline_url=None, inline_text='VK link'):
-    message = {'chat_id': chat_id, 'text': text, 'parse_mode': 'markdown'}
+    message = {'chat_id': chat_id, 'text': text, 'parse_mode': 'HTML'}
     if inline_url != None and inline_text != None:
         message = append_inline_link(message, inline_url, inline_text)
     return make_request('sendMessage', message)
 
 
 def send_photo(chat_id, photo, caption='', inline_url=None, inline_text='VK link'):
-    message = {'chat_id': chat_id, 'caption': caption, 'photo': photo, 'parse_mode': 'markdown'}
+    message = {'chat_id': chat_id, 'caption': caption, 'photo': photo, 'parse_mode': 'HTML'}
     if inline_url != None and inline_text != None:
         message = append_inline_link(message, inline_url, inline_text)
     return make_request('sendPhoto', message)
 
 
 def send_video(chat_id, video, caption='', inline_url=None, inline_text='VK link'):
-    message = {'chat_id': chat_id, 'video': video, 'caption': caption, 'parse_mode': 'markdown'}
+    message = {'chat_id': chat_id, 'video': video, 'caption': caption, 'parse_mode': 'HTML'}
     if inline_url != None and inline_text != None:
         message = append_inline_link(message, inline_url, inline_text)
     return make_request('sendVideo', message)

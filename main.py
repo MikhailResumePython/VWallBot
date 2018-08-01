@@ -1,10 +1,8 @@
 from flask import Flask, request, jsonify
 import requests
 import json
-import bot
-import vk
-import tools
-import tg_methods as tg
+from VWB import bot, tools, tg_methods as tg
+import time
 
 
 app = Flask(__name__)

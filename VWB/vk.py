@@ -1,7 +1,9 @@
 import requests
 import json
 import re
-import bot
+from VWB import bot, tools
+import time
+import math
 
 #auth token Orlov
 VK_ACCESS_TOKEN = '51ceef69886c8177ce720559f871b2d02ce0efd67895525656430907744b806bf78d783bbc329daba28ac'
@@ -39,14 +41,14 @@ def get_posts(start_time = None):
     Args:
     start_time -- Identifier required to get the next page of results
     '''
-    if start_time == '':
-        start_time = None
     posts = newsfeed_get(start_time)
-    bot.set_start_time(posts['response']['items'][0]['date'])
-    return parse_posts(posts)
+    if len(posts['response']['items']) > 0:
+        bot.set_start_time(posts['response']['items'][0]['date']) 
+        return parse_posts(posts)
+    return []
 
 
-def newsfeed_get(start_time=None, count=1, filters='post'):
+def newsfeed_get(start_time=None, filters='post'):
     '''
     Return data required to show newsfeed for the current user.
 
@@ -54,12 +56,8 @@ def newsfeed_get(start_time=None, count=1, filters='post'):
     filters -- Listed comma-separated list of feed lists that you need to receive
     start_time -- Earliest timestamp (in Unix time) of a news item to return
     '''
-    url = ('{}newsfeed.get?filters={}&return_banned=0'
-            '&access_token={}&v=5.80').format(VK_BASE_URL, filters, VK_ACCESS_TOKEN)
-    if start_time != None:
-        url += '&start_time={}'.format(start_time)
-    else:
-        url += '&count={}'.format(count)
+    url = ('{}newsfeed.get?filters={}&start_time={}&return_banned=0'
+            '&access_token={}&v=5.80').format(VK_BASE_URL, filters, start_time, VK_ACCESS_TOKEN)
     posts = requests.get(url)
     return posts.json()
 
@@ -88,7 +86,7 @@ def parse_posts(posts):
             elif attachment['type'] == 'video':
                 post.videos.append(parse_video(attachment['video']))
             elif attachment['type'] == 'doc' and attachment['doc']['size'] < 10**7:
-                post.docs.append(attachment['doc'])
+                post.docs.append(attachment['doc']['url'])
             elif attachment['type'] == 'link':
                 post.attached_link = attachment['link']['url']
             elif attachment['type'] == 'page':
