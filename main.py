@@ -1,10 +1,8 @@
-from flask import Flask
-from flask import request
-from flask import jsonify
+from flask import Flask, request, jsonify
 import requests
 import json
-import bot
-import vk
+from VWB import bot, tools, tg_methods as tg
+import time
 
 
 app = Flask(__name__)
@@ -16,13 +14,23 @@ def index():
 
 
 @app.route('/webhook', methods=['POST', 'GET'])
-def index_webhook():
+def webhook():
     if request.method == 'POST':
         update = request.get_json()
+        tools.log_json(update, 'updates.log')
         bot.handleUpdate(update)
         return jsonify(update)
     return 'hi'
 
 
+@app.route('/auth', methods=['GET'])
+def auth():
+    #auth
+    return 'Yay'
+
+
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=8080)
+    bot.start_bot()
+    #app.run(host='127.0.0.1', port=8080)
+
+
