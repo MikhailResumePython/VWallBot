@@ -1,6 +1,6 @@
 runtime: python
 env: flex
-entrypoint: gunicorn -b :$PORT main:app
+entrypoint: gunicorn -b :$PORT main:app --timeout 32000000
 
 runtime_config:
   python_version: 3
@@ -9,5 +9,5 @@ manual_scaling:
   instances: 1
 resources:
   cpu: 1
-  memory_gb: 0.5
+  memory_gb: 2
   disk_size_gb: 10

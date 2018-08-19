@@ -28,6 +28,11 @@ def auth():
     #auth
     return 'Yay'
 
+@app.route('/start', methods=['POST', 'GET'])
+def start():
+    bot.start_bot()
+    return 'Yay'
+
 
 if __name__ == '__main__':
     bot.start_bot()

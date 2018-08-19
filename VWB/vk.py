@@ -1,9 +1,8 @@
 import requests
 import json
 import re
-from VWB import bot, tools
+from VWB import bot, tools, tg_methods#@
 import time
-import math
 
 #auth token Orlov
 VK_ACCESS_TOKEN = '51ceef69886c8177ce720559f871b2d02ce0efd67895525656430907744b806bf78d783bbc329daba28ac'
@@ -70,6 +69,7 @@ def parse_posts(posts):
     posts -- VK API newsfeed.get method response
     '''
     parsed_posts = []
+    #tg_methods.send_message('166240669', str(posts))
     for item in posts['response']['items']:
         post = Post()
         post.ID = item['post_id']
