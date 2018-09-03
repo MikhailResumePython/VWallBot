@@ -72,7 +72,7 @@ def send_media_group(chat_id, media):
 
 
 def send_document(chat_id, document, caption='', inline_url=None, inline_text='VK link'):
-    message = {'chat_id': chat_id, 'document': document, 'caption': caption, 'parse_mode': 'markdown'}
+    message = {'chat_id': chat_id, 'document': document, 'caption': caption, 'parse_mode': 'HTML'}
     if inline_url != None and inline_text != None:
         message = append_inline_link(message, inline_url, inline_text)
     return make_request('sendDocument', message)

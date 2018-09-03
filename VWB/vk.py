@@ -128,6 +128,12 @@ def parse_video(video):
 
 
 def get_group_name(group_id):
+    '''
+    Return group by id.
+
+    Args:
+    group_id -- VK group ID
+    '''
     url = ('{}groups.getById?group_id={}'
             '&access_token={}&v=5.80').format(VK_BASE_URL, group_id,VK_ACCESS_TOKEN)
     group = requests.get(url)

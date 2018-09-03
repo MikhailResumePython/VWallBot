@@ -30,7 +30,11 @@ def auth():
 
 @app.route('/start', methods=['POST', 'GET'])
 def start():
-    bot.start_bot()
+    while True: #:)
+        try:
+            bot.start_bot()
+        except:
+            pass #:)
     return 'Yay'
 
 
