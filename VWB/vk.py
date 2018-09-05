@@ -5,7 +5,7 @@ from VWB import bot, tools, tg_methods#@
 import time
 
 #auth token Orlov
-VK_ACCESS_TOKEN = '51ceef69886c8177ce720559f871b2d02ce0efd67895525656430907744b806bf78d783bbc329daba28ac'
+VK_ACCESS_TOKEN = 'f98d1e49982d9edfe30f93e5eaeb61c96f1080a96259a538723b4b7aed71f167fa9ebba523efe7b0fbb48'
 VK_BASE_URL = 'https://api.vk.com/method/'
 
 class Post:
