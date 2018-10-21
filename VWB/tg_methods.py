@@ -5,9 +5,9 @@ from VWB import vk, tools
 
 
 
-BOT_TOKEN = '556191721:AAH11vENmvGlnHlDKnGiwWCnIIIdW5v-ntA'
+BOT_TOKEN = ''
 
-BASE_URL = 'https://api.telegram.org/bot' + BOT_TOKEN + '/'
+BASE_URL = 'https://api.telegram.org/bot' 
 
 
 
@@ -19,7 +19,7 @@ def make_request(method, message):
     method -- Method name
     message -- json to send
     '''
-    url = BASE_URL + method
+    url = f'{BASE_URL}{BOT_TOKEN}/{method}'
     post = requests.post(url, json=message)
     post = post.json()
     tools.log_json(post, 'request_replies.log')

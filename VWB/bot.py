@@ -12,7 +12,7 @@ def get_start_time(): #tmp func
         return f.read()
 
 def start_bot():
-    TMP_chat_id = '166240669'
+    TMP_chat_id = '-1001391410629'
     while True:
         start_time = get_start_time()
         if(start_time == ''):

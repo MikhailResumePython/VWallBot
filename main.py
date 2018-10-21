@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
 import requests
 import json
+
+
 from VWB import bot, tools, tg_methods as tg
-import time
+from VWB import tools
 
 
 app = Flask(__name__)
@@ -28,18 +30,18 @@ def auth():
     #auth
     return 'Yay'
 
-@app.route('/start', methods=['POST', 'GET'])
+@app.route('/start', methods=['POST', 'GET']) # :)
 def start():
-    while True: #:)
-        try:
-            bot.start_bot()
-        except:
-            pass #:)
+    bot.start_bot()
     return 'Yay'
 
 
 if __name__ == '__main__':
-    bot.start_bot()
+    tools.init_tokens('VWB/tokens.txt')
+    try:
+        bot.start_bot()
+    except Exception as e:
+        tools.log_err(e, 'errors.log')
     #app.run(host='127.0.0.1', port=8080)
 
 

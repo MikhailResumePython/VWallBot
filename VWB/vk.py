@@ -1,12 +1,13 @@
 import requests
 import json
 import re
-from VWB import bot, tools, tg_methods#@
+from VWB import bot, tools, tg_methods
 import time
 
-#auth token Orlov
-VK_ACCESS_TOKEN = 'f98d1e49982d9edfe30f93e5eaeb61c96f1080a96259a538723b4b7aed71f167fa9ebba523efe7b0fbb48'
+
+VK_ACCESS_TOKEN = ''
 VK_BASE_URL = 'https://api.vk.com/method/'
+
 
 class Post:
     '''VK post class.'''
@@ -69,37 +70,47 @@ def parse_posts(posts):
     posts -- VK API newsfeed.get method response
     '''
     parsed_posts = []
-    #tg_methods.send_message('166240669', str(posts))
     for item in posts['response']['items']:
         post = Post()
         post.ID = item['post_id']
         post.group_name = get_group_name(abs(item['source_id']))
         post.text = item['text']
         post.link = 'https://vk.com/wall{}_{}'.format(item['source_id'], post.ID)
-        for attachment in item['attachments']:
-            if attachment['type'] == 'photo':
-                for size in reversed(attachment['photo']['sizes']):
-                    if (size['type'] == 'z' or size['type'] == 'y' or size['type'] == 'x'
-                                            or size['type'] == 'm' or size['type'] == 's'):
-                        post.photos.append(size['url'])
-                        break
-            elif attachment['type'] == 'video':
-                post.videos.append(parse_video(attachment['video']))
-            elif attachment['type'] == 'doc' and attachment['doc']['size'] < 10**7:
-                post.docs.append(attachment['doc']['url'])
-            elif attachment['type'] == 'link':
-                post.attached_link = attachment['link']['url']
-            elif attachment['type'] == 'page':
-                post.page = attachment['page']['view_url']
-            elif attachment['type'] == 'audio':
-                post.has_audio = True
-            elif attachment['type'] == 'album':
-                post.has_album = True
-            elif attachment['type'] == 'photos_list':
-                post.has_photos_list = True   
+        if 'attachments' in item:
+            parse_attachments(item, post)
         parsed_posts.append(post)
     return parsed_posts
 
+
+def parse_attachments(item, post):
+    '''
+    Appends attachments to the Post object
+
+    Args:
+    item -- Post from VK API newsfeed.get method response
+    post -- Post object
+    '''
+    for attachment in item['attachments']:
+        if attachment['type'] == 'photo':
+            for size in reversed(attachment['photo']['sizes']):
+                if (size['type'] == 'z' or size['type'] == 'y' or size['type'] == 'x'
+                                        or size['type'] == 'm' or size['type'] == 's'):
+                    post.photos.append(size['url'])
+                    break
+        elif attachment['type'] == 'video':
+            post.videos.append(parse_video(attachment['video']))
+        elif attachment['type'] == 'doc' and attachment['doc']['size'] < 10**7:
+            post.docs.append(attachment['doc']['url'])
+        elif attachment['type'] == 'link':
+            post.attached_link = attachment['link']['url']
+        elif attachment['type'] == 'page':
+            post.page = attachment['page']['view_url']
+        elif attachment['type'] == 'audio':
+            post.has_audio = True
+        elif attachment['type'] == 'album':
+            post.has_album = True
+        elif attachment['type'] == 'photos_list':
+            post.has_photos_list = True   
                         
 def parse_video(video):
     '''
