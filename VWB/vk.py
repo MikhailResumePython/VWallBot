@@ -79,6 +79,7 @@ def parse_posts(posts):
         if 'attachments' in item:
             parse_attachments(item, post)
         parsed_posts.append(post)
+        time.sleep(0.33) # [VK API]: 5 requests per second(get_group_name)
     return parsed_posts
 
 

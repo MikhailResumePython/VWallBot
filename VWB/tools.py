@@ -1,7 +1,7 @@
 import json
 from VWB import vk, tg_methods as tg
 import datetime
-import sys, os
+import traceback
 
 def log_json(data, filename):
     '''Append json data to filename'''
@@ -12,11 +12,9 @@ def log_json(data, filename):
 
 def log_err(text, filename):
     '''Append error data to filename'''
-    exc_type, exc_obj, exc_tb = sys.exc_info()
-    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
     with open(f'VWB/logs/{filename}', 'a') as log_file:
         log_file.write(str(datetime.datetime.now()))
-        log_file.write(f'\n{text} {exc_type} {fname} {exc_tb.tb_lineno}\n\n')
+        log_file.write(f'\n{traceback.format_exc()}\n\n')
 
 
 def init_tokens(filename):
