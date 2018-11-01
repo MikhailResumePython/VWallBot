@@ -1,6 +1,8 @@
+import os
 from flask import Flask, request, jsonify
 import requests
 import json
+
 
 
 from VWB import bot, tools, tg_methods as tg
@@ -38,6 +40,7 @@ def start():
 
 if __name__ == '__main__':
     tools.init_tokens('VWB/tokens.txt')
+    os.mkdir(logs)
     try:
         bot.start_bot()
     except Exception as e:
