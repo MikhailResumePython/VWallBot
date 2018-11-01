@@ -119,9 +119,9 @@ def parse_video(video):
     Args:
     video -- VK video object
     '''
-    url = ('{}video.get?owner_id={}&videos={}_{}&count=1&extended=0&v=5.80'
+    url = ('{}video.get?owner_id={}&videos={}_{}_{}&count=1&extended=0&v=5.80'
             '&access_token={}').format(VK_BASE_URL, video['owner_id'], 
-                                        video['owner_id'], video['id'], VK_ACCESS_TOKEN)
+                                        video['owner_id'], video['id'], video['access_key'], VK_ACCESS_TOKEN)
     video_obj = requests.get(url).json()['response']['items'][0]
     video_url = video_obj['player']
     try:
