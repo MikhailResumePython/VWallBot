@@ -42,8 +42,7 @@ if __name__ == '__main__':
     tools.init_tokens('VWB/tokens.txt')
     os.mkdir('VWB/logs')
     try:
-        pass
-        #bot.start_bot()
+        bot.start_bot()
     except Exception as e:
         tools.log_err(e, 'errors.log')
     #app.run(host='127.0.0.1', port=8080)
